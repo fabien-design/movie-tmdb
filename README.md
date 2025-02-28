@@ -16,6 +16,12 @@ cd movie-tmdb
 npm install
 ```
 
+## Configuration
+Créer un .env.local et entrez votre clé api, récupérable [ici](https://www.themoviedb.org/settings/api) : 
+```
+VITE_TMDB_API_KEY=
+```
+
 ## Démarrage en mode développement
 
 Pour lancer l'application en mode développement avec rechargement à chaud :
