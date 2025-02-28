@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useIndexedDB } from '../hooks/useIndexedDB';
 import Navigation from '../components/Navigation';
 import TmdbApi, { getImageUrl } from '../api/tmdbApi';
-import { Movie, MovieDetails as MovieDetailsType, Review } from '../utils/types';
+import { Movie, MovieDetails as MovieDetailsType, Review, SearchMultiResult } from '../utils/types';
 import RatingStars from '../components/Form/RatingStars';
 
 interface MovieDetailProps {
@@ -14,7 +14,7 @@ function MovieDetail({ api_key }: MovieDetailProps) {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [movie, setMovie] = useState<MovieDetailsType | null>(null);
-  const [searchedMovies, setSearchedMovies] = useState<Movie[]>([]);
+  const [searchedResult, setSearchedResult] = useState<SearchMultiResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { getAllValue, putValue, deleteValue, isDBConnecting } = useIndexedDB('moviesDB', ['genres', 'favorites', 'reviews']);
@@ -103,13 +103,14 @@ function MovieDetail({ api_key }: MovieDetailProps) {
   const getMoviesWithQuery = (query: string) => {
     if (!api_key) {
       setError('API key is required');
+      setLoading(false);
       return;
     }
     const fetchData = async () => {
       const api = new TmdbApi(api_key);
       
-      const searchResults = await api.searchMovies(query);
-      setSearchedMovies(searchResults.results);
+      const searchedResult = (await api.searchMulti(query)).results;
+      setSearchedResult(searchedResult);
     }
 
     fetchData();
@@ -247,7 +248,7 @@ function MovieDetail({ api_key }: MovieDetailProps) {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      <Navigation searchMethod={getMoviesWithQuery} searchedMovies={searchedMovies} />
+      <Navigation searchMethod={getMoviesWithQuery} searchedResult={searchedResult} />
 
       <div className="relative">
         {movie.backdrop_path && (

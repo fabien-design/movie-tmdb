@@ -157,3 +157,28 @@ export interface ApiResponse<T> {
     total_pages: number;
     total_results: number;
 }
+
+export interface SearchMultiResult {
+    id: number;
+    media_type: "movie" | "tv" | "person";
+    vote_average?: number;
+    overview?: string;
+    type?: "movie" | "tv" | "person";
+    displayTitle?: string;
+    displayDate?: string | null;
+    imagePath?: string | null;
+    
+    // movie
+    title?: string;
+    release_date?: string;
+    poster_path?: string | null;
+    
+    // serie (tv dabs media_type)
+    name?: string;
+    first_air_date?: string;
+    
+    // person
+    profile_path?: string | null;
+    known_for_department?: string;
+    known_for?: any[];
+}

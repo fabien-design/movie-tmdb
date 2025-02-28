@@ -4,7 +4,7 @@ import MovieCard from '../components/MovieCard';
 import { useIndexedDB } from '../hooks/useIndexedDB';
 import Navigation from '../components/Navigation';
 import TmdbApi from '../api/tmdbApi';
-import { Movie } from '../utils/types';
+import { Movie, SearchMultiResult } from '../utils/types';
 import GenreSection from '../components/GenreSection';
 
 interface HomeProps {
@@ -14,7 +14,7 @@ interface HomeProps {
 function Home({ api_key }: HomeProps) {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [trendingMovies, setTrendingMovies] = useState<Movie[]>([]);
-  const [searchedMovies, setSearchedMovies] = useState<Movie[]>([]);
+  const [searchedResult, setSearchedResult] = useState<SearchMultiResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { getAllValue, putValue, deleteValue, isDBConnecting } = useIndexedDB('moviesDB', ['genres', 'favorites']);
@@ -113,9 +113,8 @@ function Home({ api_key }: HomeProps) {
     const fetchData = async () => {
       const api = new TmdbApi(api_key);
       
-      const searchedMovies = (await api.searchMovies(query)).results;
-      console.log(searchedMovies);
-      setSearchedMovies(searchedMovies);
+      const searchedResult = (await api.searchMulti(query)).results;
+      setSearchedResult(searchedResult);
     }
 
     fetchData();
@@ -123,7 +122,7 @@ function Home({ api_key }: HomeProps) {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      <Navigation searchMethod={getMoviesWithQuery} searchedMovies={searchedMovies} />
+      <Navigation searchMethod={getMoviesWithQuery} searchedResult={searchedResult} />
       
       {/* Hero section with trending movies */}
       <div className="relative h-[60vh] overflow-hidden">

@@ -1,4 +1,4 @@
-import { ApiResponse, Genre, Movie, MovieDetails } from "../utils/types";
+import { ApiResponse, Genre, Movie, MovieDetails, SearchMultiResult } from "../utils/types";
 
 const BASE_URL = "https://api.themoviedb.org/3";
 const IMAGE_BASE_URL = "https://image.tmdb.org/t/p";
@@ -103,10 +103,48 @@ class TmdbApi {
         );
     }
 
+    // searchbar query v1
     searchMovies(query: string, page: number = 1): Promise<ApiResponse<Movie>> {
         return this.fetchData<ApiResponse<Movie>>("/search/movie", {
             query,
             page,
+        });
+    }
+
+    // searchbar query v2
+    searchMulti(query: string, page: number = 1): Promise<ApiResponse<SearchMultiResult>> {
+        return this.fetchData<ApiResponse<SearchMultiResult>>("/search/multi", {
+            query,
+            page,
+        }).then(data => {
+            data.results = data.results.map(result => {
+                if (result.media_type === "movie") {
+                    return { 
+                        ...result, 
+                        type: "movie",
+                        displayTitle: result.title,
+                        displayDate: result.release_date,
+                        imagePath: result.poster_path,
+                    };
+                } else if (result.media_type === "tv") {
+                    return { 
+                        ...result, 
+                        type: "tv",
+                        displayTitle: result.name,
+                        displayDate: result.first_air_date,
+                        imagePath: result.poster_path
+                    };
+                
+                } else {
+                    return { 
+                        ...result, 
+                        type: "person",
+                        displayTitle: result.name,
+                        imagePath: result.profile_path
+                    };
+                }
+            });
+            return data;
         });
     }
 

@@ -4,7 +4,7 @@ import MovieCard from '../components/MovieCard';
 import { useIndexedDB } from '../hooks/useIndexedDB';
 import Navigation from '../components/Navigation';
 import TmdbApi from '../api/tmdbApi';
-import { Movie } from '../utils/types';
+import { Movie, SearchMultiResult } from '../utils/types';
 
 interface MoviesProps {
   api_key?: string;
@@ -12,7 +12,7 @@ interface MoviesProps {
 
 function Movies({ api_key }: MoviesProps) {
   const [movies, setMovies] = useState<Movie[]>([]);
-  const [searchedMovies, setSearchedMovies] = useState<Movie[]>([]);
+  const [searchedResult, setSearchedResult] = useState<SearchMultiResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { getAllValue, putValue, deleteValue, isDBConnecting } = useIndexedDB('moviesDB', ['genres', 'favorites']);
@@ -168,13 +168,14 @@ function Movies({ api_key }: MoviesProps) {
   const getMoviesWithQuery = (query: string) => {
     if (!api_key) {
       setError('API key is required');
+      setLoading(false);
       return;
     }
     const fetchData = async () => {
       const api = new TmdbApi(api_key);
       
-      const searchedMovies = (await api.searchMovies(query)).results;
-      setSearchedMovies(searchedMovies);
+      const searchedResult = (await api.searchMulti(query)).results;
+      setSearchedResult(searchedResult);
     }
 
     fetchData();
@@ -296,7 +297,7 @@ function Movies({ api_key }: MoviesProps) {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      <Navigation searchMethod={getMoviesWithQuery} searchedMovies={searchedMovies} />
+      <Navigation searchMethod={getMoviesWithQuery} searchedResult={searchedResult} />
       
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
