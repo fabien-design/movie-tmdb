@@ -1,50 +1,52 @@
-# React + TypeScript + Vite
+# React + TailwindCSS + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-Currently, two official plugins are available:
+# Movie TMDB Application
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Une application web permettant de parcourir et évaluer des films, utilisant l'API TMDB.
 
-## Expanding the ESLint configuration
+## Installation
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+Clonez le dépôt et installez les dépendances :
 
-- Configure the top-level `parserOptions` property like this:
-
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+```bash
+git clone https://github.com/fabien-design/movie-tmdb/
+cd movie-tmdb
+npm install
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+## Démarrage en mode développement
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+Pour lancer l'application en mode développement avec rechargement à chaud :
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
+```bash
+npm run dev
 ```
+
+L'application sera accessible à l'adresse [http://localhost:5173](http://localhost:5173) (par défaut).
+
+## Compilation
+
+Pour compiler l'application pour la production :
+
+```bash
+npm run build
+```
+
+## Fonctionnalités
+
+- Parcourir les films par genre
+- Mettre en Favoris un film
+- Voir les détails d'un film
+- Lire et écrire des avis sur les films
+- Noter les films
+- Barre de recherche multiple
+
+## Technologies utilisées
+
+- React
+- TypeScript
+- Tailwind CSS
+- Material UI (pour certains composants)
+- IndexedDB (pour le stockage local des avis, des favories)
