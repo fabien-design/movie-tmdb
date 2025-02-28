@@ -11,7 +11,7 @@ Une application web permettant de parcourir et évaluer des films, utilisant l'A
 Clonez le dépôt et installez les dépendances :
 
 ```bash
-git clone https://github.com/fabien-design/movie-tmdb/
+git clone https://github.com/fabien-design/movie-tmdb.git
 cd movie-tmdb
 npm install
 ```
