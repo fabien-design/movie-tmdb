@@ -104,7 +104,7 @@ const GenreSection = ({ api_key }: { api_key: string }) => {
           spaceBetween={10}
           className="genres-swiper px-1"
         >
-          {genres.map((genre) => (
+          {!loadingGenres && genres.map((genre) => (
             <SwiperSlide key={genre.id} className="w-auto">
               <button
                 onClick={() => setSelectedGenre(genre)}

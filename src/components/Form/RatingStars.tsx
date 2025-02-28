@@ -20,7 +20,7 @@ const RatingStars: React.FC<RatingStarsProps> = ({
     const [hover, setHover] = React.useState(-1);
 
     const handleChange = (
-        event: React.ChangeEvent<{}>,
+        _: React.ChangeEvent<{}>,
         newValue: number | null
     ) => {
         setValue(newValue);
@@ -37,7 +37,7 @@ const RatingStars: React.FC<RatingStarsProps> = ({
                 precision={0.5}
                 max={10}
                 onChange={handleChange}
-                onChangeActive={(event, newHover) => {
+                onChangeActive={(_, newHover) => {
                     setHover(newHover);
                 }}
                 emptyIcon={

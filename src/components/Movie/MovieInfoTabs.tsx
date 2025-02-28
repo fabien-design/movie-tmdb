@@ -4,7 +4,6 @@ import { MovieDetails, Review } from '../../utils/types';
 import MovieOverview from './MovieOverview';
 import MovieCast from './MovieCast';
 import MovieReviews from './MovieReviews';
-import { set } from 'lodash';
 
 interface MovieInfoTabsProps {
   movie: MovieDetails;
