@@ -3,8 +3,9 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useIndexedDB } from '../hooks/useIndexedDB';
 import Navigation from '../components/Navigation';
 import TmdbApi, { getImageUrl } from '../api/tmdbApi';
-import { Movie, MovieDetails as MovieDetailsType, Review, SearchMultiResult } from '../utils/types';
-import RatingStars from '../components/Form/RatingStars';
+import { Movie, MovieDetails as MovieDetailsType, SearchMultiResult } from '../utils/types';
+import Footer from '../components/Footer';
+import MovieInfoTabs from '../components/Movie/MovieInfoTabs';
 
 interface MovieDetailProps {
   api_key?: string;
@@ -19,11 +20,6 @@ function MovieDetail({ api_key }: MovieDetailProps) {
   const [error, setError] = useState<string | null>(null);
   const { getAllValue, putValue, deleteValue, isDBConnecting } = useIndexedDB('moviesDB', ['genres', 'favorites', 'reviews']);
   const [favorites, setFavorites] = useState<Movie[]>([]);
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [activeTab, setActiveTab] = useState<'overview' | 'cast' | 'vibe'>('overview');
-  const [rating, setRating] = useState<number>(0);
-  const [submitting, setSubmitting] = useState(false);
-  const [displayedCommentsCount, setDisplayedCommentsCount] = useState(5);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -91,15 +87,6 @@ function MovieDetail({ api_key }: MovieDetailProps) {
     return `${hours}h ${mins}min`;
   };
 
-  // Format currency codepens
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: 'USD',
-      maximumFractionDigits: 0
-    }).format(amount);
-  };
-
   const getMoviesWithQuery = (query: string) => {
     if (!api_key) {
       setError('API key is required');
@@ -115,92 +102,6 @@ function MovieDetail({ api_key }: MovieDetailProps) {
 
     fetchData();
   }
-
-  const handleRatingFormValue = (value: number) => {
-    setRating(value);
-  }
-
-  const handleSubmitReview = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setSubmitting(true);
-    const formData = new FormData(e.currentTarget);
-
-    const movieId = parseInt(formData.get('movieId') as string);
-    const rate = parseInt(formData.get('rate') as string);
-    const username = formData.get('author') as string;
-    const content = formData.get('content') as string;
-
-    try {
-      if (!rate || !username || !content) {
-        console.error('Missing required fields');
-        return;
-      }
-
-      if (rate < 0 || rate > 10) {
-        console.error('Rating must be between 0 and 10');
-        return;
-      }
-
-      if (content.length < 10) {
-        console.error('Review content must be at least 10 characters');
-        return;
-      }
-
-      if(username.length < 3) {
-        console.error('Username must be at least 3 characters');
-        return;
-      }
-
-      const review: Review = {
-        id: `${movieId}-${username}-${Date.now()}`,
-        author: username,
-        author_details: {
-          name: username,
-          username: username,
-          rating: rate,
-          avatar_path: null
-        },
-        content,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        url: null
-      }
-
-      await putValue('reviews', review);
-      const updatedReviews = await getAllValue('reviews');
-      setReviews(updatedReviews);
-
-      setTimeout(() => {
-        setSubmitting(false);
-      }
-      , 1000);
-    } catch (err) {
-      console.error('Error submitting review:', err);
-      setSubmitting(false);
-    }
-
-  }
-
-  const loadReviews = async () => {
-    if (!isDBConnecting && id) {
-      try {
-        const allReviews = await getAllValue('reviews');
-        
-        const movieId = parseInt(id);
-        const movieReviews = allReviews.filter(review => {
-          return review.id.startsWith(`${movieId}-`);
-        });
-
-        movieReviews.sort((a, b) => {
-          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-        });
-        
-        setReviews(movieReviews);
-      } catch (err) {
-        console.error('Error loading reviews:', err);
-      }
-    }
-  };
 
   if (loading || isDBConnecting) {
     return (
@@ -243,8 +144,6 @@ function MovieDetail({ api_key }: MovieDetailProps) {
       </div>
     );
   }
-
-  loadReviews();
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
@@ -357,267 +256,13 @@ function MovieDetail({ api_key }: MovieDetailProps) {
               )}
               
               {/* Content tabs */}
-              <div className="mt-8">
-                <div className="border-b border-gray-800">
-                  <nav className="flex -mb-px space-x-8">
-                    <button
-                      onClick={() => setActiveTab('overview')}
-                      className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                        activeTab === 'overview'
-                          ? 'border-blue-500 text-blue-500'
-                          : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-300'
-                      }`}
-                    >
-                      Synopsis
-                    </button>
-                    
-                    {movie.credits && movie.credits.cast && movie.credits.cast.length > 0 && (
-                      <button
-                        onClick={() => setActiveTab('cast')}
-                        className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                          activeTab === 'cast'
-                            ? 'border-blue-500 text-blue-500'
-                            : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-300'
-                        }`}
-                      >
-                        Casting
-                      </button>
-                    )}
-
-                    
-                    <button
-                      onClick={() => setActiveTab('vibe')}
-                      className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                        activeTab === 'vibe'
-                          ? 'border-blue-500 text-blue-500'
-                          : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-300'
-                      }`}
-                    >
-                      Donnez votre avis
-                    </button>
-                  </nav>
-                </div>
-
-                <div className="py-6">
-                  {activeTab === 'overview' && (
-                    <div>
-                      {movie.overview ? (
-                        <>
-                          <h3 className="text-xl font-bold mb-4">Synopsis</h3>
-                          <p className="text-gray-300 leading-relaxed">
-                            {movie.overview}
-                          </p>
-                          
-                          {/* Additional movie info */}
-                          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-                            {movie.budget > 0 && (
-                              <div>
-                                <h4 className="text-sm font-medium text-gray-400">Budget</h4>
-                                <p className="mt-1">{formatCurrency(movie.budget)}</p>
-                              </div>
-                            )}
-                            
-                            {movie.revenue > 0 && (
-                              <div>
-                                <h4 className="text-sm font-medium text-gray-400">Recette</h4>
-                                <p className="mt-1">{formatCurrency(movie.revenue)}</p>
-                              </div>
-                            )}
-                            
-                            {movie.status && (
-                              <div>
-                                <h4 className="text-sm font-medium text-gray-400">Statut</h4>
-                                <p className="mt-1">{movie.status}</p>
-                              </div>
-                            )}
-                            
-                            {movie.original_language && (
-                              <div>
-                                <h4 className="text-sm font-medium text-gray-400">Langue originale</h4>
-                                <p className="mt-1">{movie.original_language.toUpperCase()}</p>
-                              </div>
-                            )}
-                            
-                            {movie.production_companies && movie.production_companies.length > 0 && (
-                              <div className="md:col-span-2">
-                                <h4 className="text-sm font-medium text-gray-400">Sociétés de production</h4>
-                                <div className="mt-1 flex flex-wrap gap-4">
-                                  {movie.production_companies.map(company => (
-                                    <div key={company.id} className="flex items-center">
-                                      {company.logo_path ? (
-                                        <img 
-                                          src={getImageUrl(company.logo_path, 'small', 'profile') || ''} 
-                                          alt={company.name}
-                                          className="h-8 mr-2 bg-white rounded p-1"
-                                        />
-                                      ) : null}
-                                      <span>{company.name}</span>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        </>
-                      ) : (
-                        <p className="text-gray-400">
-                          Aucun synopsis disponible pour ce film.
-                        </p>
-                      )}
-                    </div>
-                  )}
-                  
-                  {activeTab === 'cast' && movie.credits && movie.credits.cast && (
-                    <div>
-                      <h3 className="text-xl font-bold mb-4">Casting principal</h3>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                        {movie.credits.cast.slice(0, 10).map(person => (
-                          <div key={person.id} className="bg-gray-800 rounded-lg overflow-hidden shadow">
-                            <div className="h-48 overflow-hidden">
-                              {person.profile_path ? (
-                                <img 
-                                  src={getImageUrl(person.profile_path, 'medium', 'profile') || ''} 
-                                  alt={person.name}
-                                  className="w-full h-full object-cover"
-                                />
-                              ) : (
-                                <div className="w-full h-full bg-gray-700 flex items-center justify-center">
-                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                  </svg>
-                                </div>
-                              )}
-                            </div>
-                            <div className="p-3">
-                              <h4 className="font-bold truncate">{person.name}</h4>
-                              <p className="text-sm text-gray-400 truncate">{person.character}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      
-                      {movie.credits.cast.length > 10 && (
-                        <div className="mt-4 text-center">
-                          <button className="text-blue-500 hover:text-blue-400 font-medium">
-                            Voir tout le casting
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {activeTab === 'vibe' && (
-                    <>
-                      <div>
-                        <h3 className="text-xl font-bold mb-6">Votre avis nous intéresse !</h3>
-                        <form onSubmit={handleSubmitReview} className="mt-4">
-                          <input type='hidden' name='movieId' value={movie.id} />
-                          <input type='hidden' name='rate' value={rating} />
-                          <RatingStars ratingHandle={handleRatingFormValue} className={'mb-2'} readOnly={submitting} />
-                          <input 
-                            type='text'
-                            name='author'
-                            placeholder="Votre pseudo"
-                            className="w-full bg-gray-700 text-gray-100 p-3 rounded-lg mb-2"
-                            required
-                            {...(submitting ? { disabled: true } : {})}
-                          />
-                          <textarea
-                            name='content'
-                            placeholder="Partagez votre avis sur ce film..."
-                            className="w-full bg-gray-700 text-gray-100 p-3 rounded-lg mt-2"
-                            required
-                            {...(submitting ? { disabled: true } : {})}
-                          ></textarea>
-                          <button
-                            type="submit"
-                            className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg mt-4"
-                            {...(submitting ? { disabled: true } : {})}
-                          >
-                            {submitting ? 'Envoi en cours': 'Envoyer'}
-                          </button>
-                        </form>
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-bold mt-8 mb-6">Avis des spectateurs</h3>
-                        {reviews.length > 0 ? (
-                          <div>
-                            {reviews.slice(0, displayedCommentsCount).map(review => (
-                              <div key={review.id} className="bg-gray-800 p-4 rounded-lg mb-4">
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center">
-                                    <div className="h-10 w-10 bg-gray-700 rounded-full overflow-hidden flex justify-center items-center">
-                                      {review.author_details?.avatar_path ? (
-                                        <img 
-                                          src={getImageUrl(review.author_details.avatar_path, 'small', 'profile') || ''} 
-                                          alt={review.author}
-                                          className="w-full h-full object-cover"
-                                        />
-                                      ) : (
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                        </svg>
-                                      )}
-                                    </div>
-                                    <div className="ml-4">
-                                      <h4 className="font-bold">{review.author}</h4>
-                                      <div className="flex items-center">
-                                        <span className="text-gray-400 ml-2">{review.author_details?.rating || 0} / 10</span>
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <span className="text-gray-400 text-sm">{new Date(review.created_at).toLocaleDateString('fr-FR')}</span>
-                                </div>
-                                <p className="mt-2 text-gray-300">{review.content}</p>
-                              </div>
-                            ))}
-                            
-                            {reviews.length > displayedCommentsCount && (
-                              <div className="text-center mt-4">
-                                <button 
-                                  onClick={() => setDisplayedCommentsCount(prev => prev + 5)}
-                                  className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-full text-sm font-medium transition"
-                                >
-                                  Voir plus de commentaires ({reviews.length - displayedCommentsCount} restants)
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        ) : (
-                          <div className="bg-gray-800 p-6 rounded-lg text-center">
-                            <p className="text-gray-400">Aucun avis pour le moment. Soyez le premier à donner votre avis !</p>
-                          </div>
-                        )}
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
+              <MovieInfoTabs movie={movie} />
             </div>
           </div>
         </div>
       </div>
       
-      <footer className="bg-gray-800 py-8 mt-12">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="mb-4 md:mb-0">
-              <p className="text-gray-400 text-sm">© 2025 MovieDB - Tous droits réservés</p>
-            </div>
-            <div className="flex space-x-4">
-              <a href="#" className="text-gray-400 hover:text-white transition">
-                À propos
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition">
-                Contact
-              </a>  
-              <a href="#" className="text-gray-400 hover:text-white transition">
-                Politique de confidentialité
-              </a>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

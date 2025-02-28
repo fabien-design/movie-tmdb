@@ -14,7 +14,7 @@ interface UseIndexedDBResult {
     id: number;
     newItem: any;
   }) => void;
-  deleteValue: (tableName: string, id: number) => number | null;
+  deleteValue: (tableName: string, id: string | number) => string | number | null;
   deleteAll: (tableName: string) => void;
   isDBConnecting: boolean;
 }
@@ -153,7 +153,7 @@ export const useIndexedDB = (
   };
 
   // Function to delete a specific value by ID from a specific table
-  const deleteValue = (tableName: string, id: number): number | null => {
+  const deleteValue = (tableName: string, id: number|string): string | number | null => {
     try {
       const store = getTransaction(tableName, "readwrite");
       store.delete(id);

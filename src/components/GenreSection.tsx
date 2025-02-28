@@ -52,12 +52,10 @@ const GenreSection = ({ api_key }: { api_key: string }) => {
             ...genre,
             id: genre.id
           }));
-          
-          // Stocker chaque genre individuellement
+
           for (const genre of genresWithIds) {
             await putValue('genres', genre);
           }
-          console.log('Genres cached in IndexedDB');
         }
       } catch (error) {
         console.error('Error fetching or caching genres:', error);
