@@ -18,7 +18,7 @@ function Home({ api_key }: HomeProps) {
   const [searchedResult, setSearchedResult] = useState<SearchMultiResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { getAllValue, putValue, deleteValue, isDBConnecting } = useIndexedDB('moviesDB', ['genres', 'favorites']);
+  const { getAllValue, putValue, deleteValue, isDBConnecting } = useIndexedDB('moviesDB', ['genres', 'favorites', 'reviews']);
   const [favorites, setFavorites] = useState<Movie[]>([]);
 
   // Fetch movies from API
