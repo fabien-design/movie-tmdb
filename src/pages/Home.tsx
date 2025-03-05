@@ -238,7 +238,7 @@ function Home({ api_key }: HomeProps) {
           </div>
         </div>
 
-        <GenreSection api_key={api_key!} />
+        <GenreSection api_key={api_key!} toggleFavorite={toggleFavorite} isFavorite={isFavorite} />
       </main>
 
       <Footer />

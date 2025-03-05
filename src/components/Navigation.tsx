@@ -281,7 +281,7 @@ const Navigation: React.FC<NavigationProps> = ({
                                                 {searchedResult.length > 5 && (
                                                     <li className="p-2 text-center">
                                                         <Link
-                                                            to={`${TMDB_BASE_URL}/search?q=${encodeURIComponent(
+                                                            to={`${TMDB_BASE_URL}/search?query=${encodeURIComponent(
                                                                 searchQuery
                                                             )}`}
                                                             className="text-blue-400 text-sm hover:text-blue-300"

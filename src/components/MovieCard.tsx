@@ -25,11 +25,11 @@ const MovieCard: React.FC<MovieProps> = ({ movie }) => {
     <div className="w-full max-w-[240px] mx-auto rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 bg-white hover:-translate-y-1">
       <div className="relative h-[360px] overflow-hidden">
         <img 
-          src={posterUrl} 
+          src={posterUrl}
           alt={`Affiche du film ${movie.title}`} 
           className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
         />
-        <div className="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded font-bold text-sm">
+        <div className="absolute top-2 left-2 bg-black/70 text-white px-2 py-1 rounded font-bold text-sm">
           {movie.vote_average.toFixed(1)}
         </div>
       </div>

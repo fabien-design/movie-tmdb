@@ -11,7 +11,7 @@ import 'swiper/css/scrollbar';
 import { useIndexedDB } from '../hooks/useIndexedDB';
 
 // Composant pour la section des genres
-const GenreSection = ({ api_key }: { api_key: string }) => {
+const GenreSection = ({ api_key, toggleFavorite, isFavorite }: { api_key: string, toggleFavorite: (movie: Movie) => void, isFavorite: (id: number) => boolean }) => {
   const [genres, setGenres] = useState<Genre[]>([]);
   const [selectedGenre, setSelectedGenre] = useState<Genre | null>(null);
   const [genreMovies, setGenreMovies] = useState<Movie[]>([]);
@@ -121,7 +121,7 @@ const GenreSection = ({ api_key }: { api_key: string }) => {
         </Swiper>
       </div>
       
-      {/* Affichage du genre sélectionné et carrousel de films */}
+      {/* Affichage du carrousel de films */}
       {selectedGenre && (
         <div className="mt-8">
           <h3 className="text-xl font-medium mb-4 text-white">Films {selectedGenre.name}</h3>
@@ -150,9 +150,21 @@ const GenreSection = ({ api_key }: { api_key: string }) => {
             >
               {genreMovies.map((movie) => (
                 <SwiperSlide key={movie.id}>
-                  <Link to={`/movie/${movie.id}`} className="block">
-                    <MovieCard movie={movie} />
-                  </Link>
+                  <div key={movie.id} className="relative group">
+                    <Link to={`/movie/${movie.id}`} className="block">
+                      <MovieCard movie={movie} />
+                    </Link>
+                    <button 
+                      onClick={() => toggleFavorite(movie)}
+                      className={`absolute top-3 right-3 p-2 rounded-full bg-gray-800/70 hover:bg-gray-700/90 transition-all duration-200 ${
+                        isFavorite(movie.id) ? 'text-red-500' : 'text-gray-300'
+                      }`}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  </div>
                 </SwiperSlide>
               ))}
             </Swiper>
